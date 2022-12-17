@@ -10,7 +10,7 @@ public static class InputManager
     //List of all action events
     static List<InputUnityEvent> events = new List<InputUnityEvent>();
     //InputSetter instance
-    public static InputSetter inputSetter;
+    public static InputScene inputScene;
     public static void ClearListeners(Scene a,Scene b)
     {
         //Removes all subscribed listeners of all events
@@ -46,13 +46,13 @@ public static class InputManager
     public static void AddInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
         //Subscribe to event of action named _actionName with _method
-        if(inputSetter == null) CreateInputOnScene();
+        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.AddListener(_method);
     }
     public static void AddInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
         //Subscribe to specific interaction event of action named _actionName with _method
-        if(inputSetter == null) CreateInputOnScene();
+        if(inputScene == null) CreateInputOnScene();
         switch (_type)
         {
             case InputType.Started:
