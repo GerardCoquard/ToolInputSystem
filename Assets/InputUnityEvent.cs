@@ -1,4 +1,5 @@
 using UnityEngine.Events;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>
@@ -13,6 +14,9 @@ public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>
     {
         actionName = _action.name;
         _enabled = true;
+        startedAction = new UnityEvent();
+        performedAction = new UnityEvent();
+        canceledAction = new UnityEvent();
         _action.started += InvokeEvent;
         _action.started += InvokeStartedEvent;
         _action.performed += InvokeEvent;

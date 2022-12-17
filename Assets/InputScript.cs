@@ -1,25 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
-
 public class InputScript : MonoBehaviour
 {
     private static InputScript instance;
     List<InputUnityEvent> events;
     PlayerInput playerInput;
     private void OnEnable() {
-        SceneManager.sceneLoaded += ClearListeners;
+        SceneManager.activeSceneChanged += ClearListeners;
         InputUser.onChange += OnInputDeviceChange;
     }
     private void OnDisable() {
-        SceneManager.sceneLoaded -= ClearListeners;
+        SceneManager.activeSceneChanged -= ClearListeners;
         InputUser.onChange -= OnInputDeviceChange;
     }
-    void ClearListeners(Scene a,LoadSceneMode b)
+    void ClearListeners(Scene a,Scene b)
     {
+        if(a.buildIndex == -1) return;
         foreach (InputUnityEvent _event in events)
         {
             _event.ClearListeners();
@@ -33,13 +34,14 @@ public class InputScript : MonoBehaviour
     {
         if (instance)
         {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         }
         instance = this;
+        Init();
         DontDestroyOnLoad(gameObject);
     }
-    void Init() 
+    void Init()
     {
         playerInput = GetComponent<PlayerInput>();
         events = new List<InputUnityEvent>();
@@ -57,7 +59,8 @@ public class InputScript : MonoBehaviour
     {
         if(instance == null)
         {
-            instance = new GameObject("InputManager").AddComponent<InputScript>();
+            var pref = Instantiate(Resources.Load("Prefabs/InputManager") as GameObject,Vector3.zero,Quaternion.identity);
+            instance = pref.GetComponent<InputScript>();
             instance.Init();
         }
         return instance;
@@ -82,7 +85,6 @@ public class InputScript : MonoBehaviour
                 GetAction(_actionName)?.canceledAction.AddListener(_method);
             break;
         }
-        
     }
     public void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
