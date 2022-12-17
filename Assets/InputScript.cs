@@ -10,8 +10,18 @@ using UnityEngine.UI;
 
 public class InputScript : MonoBehaviour
 {
-    public void OnMove()
-    {
-        
+    List<InputAction> actionList;
+    PlayerInput playerInput;
+    private void Start() {
+        playerInput = GetComponent<PlayerInput>();
+        actionList = new List<InputAction>();
+        foreach (InputAction act in playerInput.actions.FindActionMap("Player"))
+        {
+            actionList.Add(act);
+        }
+        foreach (InputAction item in actionList)
+        {
+            Debug.Log(item.name);
+        }
     }
 }
