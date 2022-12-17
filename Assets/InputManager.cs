@@ -5,45 +5,28 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
-public class InputScript : MonoBehaviour
+public static class InputManager
 {
-    private static InputScript instance;
-    List<InputUnityEvent> events;
-    PlayerInput playerInput;
-    private void OnEnable() {
-        SceneManager.activeSceneChanged += ClearListeners;
-        InputUser.onChange += OnInputDeviceChange;
-    }
-    private void OnDisable() {
-        SceneManager.activeSceneChanged -= ClearListeners;
-        InputUser.onChange -= OnInputDeviceChange;
-    }
-    void ClearListeners(Scene a,Scene b)
+    //List of all action events
+    static List<InputUnityEvent> events = new List<InputUnityEvent>();
+    //InputSetter instance
+    public static InputSetter inputSetter;
+    public static void ClearListeners(Scene a,Scene b)
     {
+        //Removes all subscribed listeners of all events
         if(a.buildIndex == -1) return;
         foreach (InputUnityEvent _event in events)
         {
             _event.ClearListeners();
         }
     }
-    void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
+    public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
     {
         //Do stuff when device changed
     }
-    private void Awake()
+    public static void CreateEvents(PlayerInput playerInput)
     {
-        if (instance)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        instance = this;
-        Init();
-        DontDestroyOnLoad(gameObject);
-    }
-    void Init()
-    {
-        playerInput = GetComponent<PlayerInput>();
+        //Creates one event for each action in PlayerInput
         events = new List<InputUnityEvent>();
 
         foreach (InputActionMap actionMap in playerInput.actions.actionMaps)
@@ -55,22 +38,21 @@ public class InputScript : MonoBehaviour
             }
         }
     }
-    public static InputScript GetInputScript()
+    static void CreateInputOnScene()
     {
-        if(instance == null)
-        {
-            var pref = Instantiate(Resources.Load("Prefabs/InputManager") as GameObject,Vector3.zero,Quaternion.identity);
-            instance = pref.GetComponent<InputScript>();
-            instance.Init();
-        }
-        return instance;
+        //Creates the InputManager GameObject on Scene, wich works alongside with InputManager(this)
+        GameObject pref = MonoBehaviour.Instantiate(Resources.Load("Prefabs/InputManager") as GameObject,Vector3.zero,Quaternion.identity);
     }
-    public void AddInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
+    public static void AddInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
+        //Subscribe to event of action named _actionName with _method
+        if(inputSetter == null) CreateInputOnScene();
         GetAction(_actionName)?.AddListener(_method);
     }
-    public void AddInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
+    public static void AddInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
+        //Subscribe to specific interaction event of action named _actionName with _method
+        if(inputSetter == null) CreateInputOnScene();
         switch (_type)
         {
             case InputType.Started:
@@ -86,12 +68,14 @@ public class InputScript : MonoBehaviour
             break;
         }
     }
-    public void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
+    public static void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
+        //Unsubscribe to event of action named _actionName with _method
         GetAction(_actionName)?.RemoveListener(_method);
     }
-    public void RemoveInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
+    public static void RemoveInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
+        //Unsubscribe to specific interaction event of action named _actionName with _method
         switch (_type)
         {
             case InputType.Started:
@@ -106,22 +90,24 @@ public class InputScript : MonoBehaviour
                 GetAction(_actionName)?.canceledAction.RemoveListener(_method);
             break;
         }
-        
     }
 
-    public void ActionEnabled(string _actionName,bool _enabled)
+    public static void ActionEnabled(string _actionName,bool _enabled)
     {
+        //Sets event enabled of action named _ActionName to _enabled
         GetAction(_actionName)?.SetEnabled(_enabled);
     }
-    public void ActionEnabled(string[] _actionNames,bool _enabled)
+    public static void ActionEnabled(string[] _actionNames,bool _enabled)
     {
+        //Sets events enabled of actions named _ActionName to _enabled
         foreach (string _actionName in _actionNames)
         {
             ActionEnabled(_actionName,_enabled);
         }
     }
-    InputUnityEvent GetAction(string _actionName)
+    static InputUnityEvent GetAction(string _actionName)
     {
+        //Returns event of action named _actionName
         foreach (InputUnityEvent _event in events)
         {
             if(_event.actionName == _actionName)

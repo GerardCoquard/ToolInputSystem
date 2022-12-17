@@ -4,48 +4,48 @@ using UnityEngine.InputSystem;
 
 public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>
 {
-    public string actionName;
-    bool _enabled;
-    public UnityEvent startedAction;
+    //Base event class of action events
+    public string actionName; //Action name
+    bool _enabled; //If this event can be triggered
+
+    //Specific events
+    public UnityEvent startedAction; 
     public UnityEvent performedAction;
     public UnityEvent canceledAction;
 
     public InputUnityEvent(InputAction _action)
     {
+        //Constructor of the class
+        //Sets Action name
+        //Sets Action enabled
+        //Links action event to this event
+        //Links specific action events to this specific events (started, performed, canceled)
         actionName = _action.name;
         _enabled = true;
         startedAction = new UnityEvent();
         performedAction = new UnityEvent();
         canceledAction = new UnityEvent();
         _action.started += InvokeEvent;
-        _action.started += InvokeStartedEvent;
         _action.performed += InvokeEvent;
-        _action.performed += InvokePerformedEvent;
         _action.canceled += InvokeEvent;
-        _action.canceled += InvokeCanceledEvent;
     }
     void InvokeEvent(InputAction.CallbackContext context)
     {
+        //Invokes of this event and his specifics
         if(_enabled) this?.Invoke(context);
-    }
-    void InvokeStartedEvent(InputAction.CallbackContext context)
-    {
-        if(_enabled) startedAction?.Invoke();
-    }
-    void InvokePerformedEvent(InputAction.CallbackContext context)
-    {
-        if(_enabled) performedAction?.Invoke();
-    }
-    void InvokeCanceledEvent(InputAction.CallbackContext context)
-    {
-        if(_enabled) canceledAction?.Invoke();
+
+        if(context.started) startedAction?.Invoke();
+        if(context.performed) performedAction?.Invoke();
+        if(context.canceled) canceledAction?.Invoke();
     }
     public void SetEnabled(bool enable)
     {
+        //Sets if this event is enabled or not
         _enabled = enable;
     }
     public void ClearListeners()
     {
+        //Clears all listeners of this event and his specifics
         this.RemoveAllListeners();
         startedAction.RemoveAllListeners();
         performedAction.RemoveAllListeners();

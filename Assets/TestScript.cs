@@ -6,23 +6,22 @@ using UnityEngine.SceneManagement;
 
 public class TestScript : MonoBehaviour
 {
-    public InputScript inputScript;
     private void OnEnable() {
-        InputScript.GetInputScript().AddInputAction("Fire",InputType.Started,Hello);
-        InputScript.GetInputScript().AddInputAction("Move",Move);
+        InputManager.AddInputAction("Fire",InputType.Started,Hello);
+        InputManager.AddInputAction("Move",Move);
     }
     private void OnDisable() {
-        //InputScript.GetInputScript().RemoveInputAction("Fire",InputType.Started,Hello);
-        //InputScript.GetInputScript().RemoveInputAction("Move",Move);
+        InputManager.RemoveInputAction("Fire",InputType.Started,Hello);
+        InputManager.RemoveInputAction("Move",Move);
     }
     private void Update() {
         if(Input.GetKeyDown(KeyCode.Z))
         {
-            InputScript.GetInputScript().ActionEnabled("Fire",true);
+            InputManager.ActionEnabled("Fire",true);
         }
         if(Input.GetKeyDown(KeyCode.X))
         {
-            InputScript.GetInputScript().ActionEnabled("Fire",false);
+            InputManager.ActionEnabled("Fire",false);
         }
         if(Input.GetKeyDown(KeyCode.R))
         {
