@@ -12,7 +12,6 @@ public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>
     public UnityEvent startedAction; 
     public UnityEvent performedAction;
     public UnityEvent canceledAction;
-
     public InputUnityEvent(InputAction _action)
     {
         //Constructor of the class
@@ -31,9 +30,10 @@ public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>
     }
     void InvokeEvent(InputAction.CallbackContext context)
     {
-        //Invokes of this event and his specifics
-        if(_enabled) this?.Invoke(context);
+        //Invokes of this event and his specifics if input is enabled
+        if(!_enabled) return;
 
+        this?.Invoke(context);
         if(context.started) startedAction?.Invoke();
         if(context.performed) performedAction?.Invoke();
         if(context.canceled) canceledAction?.Invoke();

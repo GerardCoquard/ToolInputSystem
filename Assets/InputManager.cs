@@ -71,11 +71,13 @@ public static class InputManager
     public static void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
         //Unsubscribe to event of action named _actionName with _method
+        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.RemoveListener(_method);
     }
     public static void RemoveInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
         //Unsubscribe to specific interaction event of action named _actionName with _method
+        if(inputScene == null) CreateInputOnScene();
         switch (_type)
         {
             case InputType.Started:
@@ -95,15 +97,22 @@ public static class InputManager
     public static void ActionEnabled(string _actionName,bool _enabled)
     {
         //Sets event enabled of action named _ActionName to _enabled
+        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.SetEnabled(_enabled);
     }
     public static void ActionEnabled(string[] _actionNames,bool _enabled)
     {
         //Sets events enabled of actions named _ActionName to _enabled
+        if(inputScene == null) CreateInputOnScene();
         foreach (string _actionName in _actionNames)
         {
             ActionEnabled(_actionName,_enabled);
         }
+    }
+    public static void ChangeActionMap(string _actionMapName)
+    {
+        if(inputScene == null) CreateInputOnScene();
+        //cambiar action map
     }
     static InputUnityEvent GetAction(string _actionName)
     {
@@ -115,7 +124,7 @@ public static class InputManager
                 return _event;
             }
         }
-        Debug.Log("Action named " + _actionName + " doesn't exist");
+        Debug.LogWarning("Action named " + _actionName + " doesn't exist");
         return null;
     }
 }
