@@ -1,5 +1,4 @@
 using UnityEngine.Events;
-using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputUnityEvent : UnityEvent<InputAction.CallbackContext>

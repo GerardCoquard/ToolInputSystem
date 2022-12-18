@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,10 +6,30 @@ using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 public static class InputManager
 {
-    //List of all action events
-    static List<InputUnityEvent> events = new List<InputUnityEvent>();
-    //InputSetter instance
-    public static InputScene inputScene;
+    static List<InputUnityEvent> events = new List<InputUnityEvent>(); //List of all action events
+    public static PlayerInput playerInput; //Current PlayerInput
+    public static EventSystem eventSystem; //Current EventSystem
+    static string path; //Path of the InputManager prefab
+    static InputManager()
+    {
+        //Constructor called only one time when a static method of this class is called
+        path = "Prefabs/InputManager"; //Modify path how you want, but remember the root file is Resources
+        //Checks if prefab is there
+        if(Resources.Load(path) == null)
+        {
+            Debug.LogWarning("Prefab not found. Your input prefab have to be at " + path);
+            return;
+        }
+        //Instantiates InputManager prefab, sets the current EventSystem and PlayerInput, and creates all events for each action it has
+        GameObject sceneInput = CreateInputOnScene();
+        MonoBehaviour.DontDestroyOnLoad(sceneInput);
+        playerInput = sceneInput.GetComponent<PlayerInput>();
+        eventSystem = sceneInput.GetComponent<EventSystem>();
+        CreateEvents(playerInput);
+        //Subscribe to scene changes and device changes
+        SceneManager.activeSceneChanged += ClearListeners;
+        InputUser.onChange += OnInputDeviceChange;
+    }
     public static void ClearListeners(Scene a,Scene b)
     {
         //Removes all subscribed listeners of all events
@@ -38,21 +57,19 @@ public static class InputManager
             }
         }
     }
-    static void CreateInputOnScene()
+    static GameObject CreateInputOnScene()
     {
         //Creates the InputManager GameObject on Scene, wich works alongside with InputManager(this)
-        GameObject pref = MonoBehaviour.Instantiate(Resources.Load("Prefabs/InputManager") as GameObject,Vector3.zero,Quaternion.identity);
+        return MonoBehaviour.Instantiate(Resources.Load(path) as GameObject,Vector3.zero,Quaternion.identity);
     }
     public static void AddInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
         //Subscribe to event of action named _actionName with _method
-        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.AddListener(_method);
     }
     public static void AddInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
         //Subscribe to specific interaction event of action named _actionName with _method
-        if(inputScene == null) CreateInputOnScene();
         switch (_type)
         {
             case InputType.Started:
@@ -71,13 +88,11 @@ public static class InputManager
     public static void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
     {
         //Unsubscribe to event of action named _actionName with _method
-        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.RemoveListener(_method);
     }
     public static void RemoveInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
     {
         //Unsubscribe to specific interaction event of action named _actionName with _method
-        if(inputScene == null) CreateInputOnScene();
         switch (_type)
         {
             case InputType.Started:
@@ -97,13 +112,11 @@ public static class InputManager
     public static void ActionEnabled(string _actionName,bool _enabled)
     {
         //Sets event enabled of action named _ActionName to _enabled
-        if(inputScene == null) CreateInputOnScene();
         GetAction(_actionName)?.SetEnabled(_enabled);
     }
     public static void ActionEnabled(string[] _actionNames,bool _enabled)
     {
         //Sets events enabled of actions named _ActionName to _enabled
-        if(inputScene == null) CreateInputOnScene();
         foreach (string _actionName in _actionNames)
         {
             ActionEnabled(_actionName,_enabled);
@@ -111,8 +124,8 @@ public static class InputManager
     }
     public static void ChangeActionMap(string _actionMapName)
     {
-        if(inputScene == null) CreateInputOnScene();
-        //cambiar action map
+        //Change PlayerInput Action Map to one named _actionMapName
+        playerInput.SwitchCurrentActionMap(_actionMapName);
     }
     static InputUnityEvent GetAction(string _actionName)
     {
@@ -124,7 +137,7 @@ public static class InputManager
                 return _event;
             }
         }
-        Debug.LogWarning("Action named " + _actionName + " doesn't exist");
+        if(playerInput!=null) Debug.LogWarning("Action named " + _actionName + " doesn't exist");
         return null;
     }
 }
