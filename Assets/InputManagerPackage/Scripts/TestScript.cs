@@ -13,16 +13,6 @@ public class TestScript : MonoBehaviour
         InputManager.RemoveInputAction("Fire",InputType.Started,Shoot);
         InputManager.RemoveInputAction("Move",Move);
     }
-    private void Update() {
-        if(Input.GetKeyDown(KeyCode.Z))
-        {
-            InputManager.ActionEnabled("Fire",true);
-        }
-        if(Input.GetKeyDown(KeyCode.X))
-        {
-            InputManager.ActionEnabled("Fire",false);
-        }
-    }
 
     public void Shoot()
     {
