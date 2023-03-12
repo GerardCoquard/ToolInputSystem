@@ -1,2 +1,0 @@
-You need to place your prefab with the PlayerInput component at Resources/Prefabs/InputManager, or modify the path yourself.
-The prefab needs to have all of these components: PlayerInput,EventSystem,InputSystemUIInputModule.

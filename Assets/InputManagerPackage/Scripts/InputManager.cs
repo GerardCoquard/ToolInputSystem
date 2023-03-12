@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public static class InputManager
 {
     static GameObject sceneInput;
-    static List<InputUnityEvent> events = new List<InputUnityEvent>(); //List of all action events
+    static List<ActionContainer> events = new List<ActionContainer>(); //List of all action events
     public static PlayerInput playerInput; //Current PlayerInput
     public static EventSystem eventSystem; //Current EventSystem
     static string path; //Path of the InputManager prefab
@@ -29,32 +29,32 @@ public static class InputManager
         eventSystem = sceneInput.GetComponent<EventSystem>();
         CreateEvents(playerInput);
         //Subscribe to scene changes and device changes
-        SceneManager.activeSceneChanged += ClearListeners;
+        SceneManager.sceneUnloaded += ClearListeners;
         InputUser.onChange += OnInputDeviceChange;
     }
-    public static void ClearListeners(Scene a,Scene b)
+    public static void ClearListeners(Scene a)
     {
         //Removes all subscribed listeners of all events
-        if(a.buildIndex == -1) return;
-        foreach (InputUnityEvent _event in events)
+        foreach (ActionContainer _event in events)
         {
             _event.ClearListeners();
-        }
+        }     
     }
     public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
     {
+        if(change == InputUserChange.ControlSchemeChanged) Debug.Log("New Device: " + user.controlScheme.Value.name);
         //Do stuff when device changed
     }
     public static void CreateEvents(PlayerInput playerInput)
     {
         //Creates one event for each action in PlayerInput
-        events = new List<InputUnityEvent>();
+        events = new List<ActionContainer>();
 
         foreach (InputActionMap actionMap in playerInput.actions.actionMaps)
         {
             foreach (InputAction act in actionMap)
             {
-                InputUnityEvent newActionEvent = new InputUnityEvent(act);
+                ActionContainer newActionEvent = new ActionContainer(act);
                 events.Add(newActionEvent);
             }
         }
@@ -64,64 +64,17 @@ public static class InputManager
         //Creates the InputManager GameObject on Scene, wich works alongside with InputManager(this)
         return MonoBehaviour.Instantiate(Resources.Load(path) as GameObject,Vector3.zero,Quaternion.identity);
     }
-    public static InputAction GetAction(string _actionName)
+    public static ActionContainer GetAction(string _actionName)
     {
         //Subscribe to event of action named _actionName with _method
-        return GetEvent(_actionName).GetAction();
+        return GetEvent(_actionName);
     }
-    public static void AddInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
-    {
-        //Subscribe to event of action named _actionName with _method
-        GetEvent(_actionName)?.AddListener(_method);
-    }
-    public static void AddInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
-    {
-        //Subscribe to specific interaction event of action named _actionName with _method
-        switch (_type)
-        {
-            case InputType.Started:
-                GetEvent(_actionName)?.startedAction.AddListener(_method);
-            break;
-
-            case InputType.Performed:
-                GetEvent(_actionName)?.performedAction.AddListener(_method);
-            break;
-
-            case InputType.Canceled:
-                GetEvent(_actionName)?.canceledAction.AddListener(_method);
-            break;
-        }
-    }
-    public static void RemoveInputAction(string _actionName, UnityEngine.Events.UnityAction<InputAction.CallbackContext> _method)
-    {
-        //Unsubscribe to event of action named _actionName with _method
-        GetEvent(_actionName)?.RemoveListener(_method);
-    }
-    public static void RemoveInputAction(string _actionName,InputType _type, UnityEngine.Events.UnityAction _method)
-    {
-        //Unsubscribe to specific interaction event of action named _actionName with _method
-        switch (_type)
-        {
-            case InputType.Started:
-                GetEvent(_actionName)?.startedAction.RemoveListener(_method);
-            break;
-
-            case InputType.Performed:
-                GetEvent(_actionName)?.performedAction.RemoveListener(_method);
-            break;
-
-            case InputType.Canceled:
-                GetEvent(_actionName)?.canceledAction.RemoveListener(_method);
-            break;
-        }
-    }
-
     public static void ActionEnabled(string _actionName,bool _enabled)
     {
         //Sets event enabled of action named _ActionName to _enabled
         GetEvent(_actionName)?.SetEnabled(_enabled);
     }
-    public static void ActionEnabled(string[] _actionNames,bool _enabled)
+    public static void ActionsEnabled(string[] _actionNames,bool _enabled)
     {
         //Sets events enabled of actions named _ActionName to _enabled
         foreach (string _actionName in _actionNames)
@@ -134,10 +87,10 @@ public static class InputManager
         //Change PlayerInput Action Map to one named _actionMapName
         playerInput.SwitchCurrentActionMap(_actionMapName);
     }
-    static InputUnityEvent GetEvent(string _actionName)
+    static ActionContainer GetEvent(string _actionName)
     {
         //Returns event of action named _actionName
-        foreach (InputUnityEvent _event in events)
+        foreach (ActionContainer _event in events)
         {
             if(_event.actionName == _actionName)
             {
@@ -147,10 +100,4 @@ public static class InputManager
         if(playerInput!=null) Debug.LogWarning("Action named " + _actionName + " doesn't exist");
         return null;
     }
-}
-public enum InputType
-{
-    Started,
-    Performed,
-    Canceled
 }
