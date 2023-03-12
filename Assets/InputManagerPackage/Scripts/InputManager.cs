@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 public static class InputManager
@@ -42,8 +43,8 @@ public static class InputManager
     }
     public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
     {
-        if(change == InputUserChange.ControlSchemeChanged) Debug.Log("New Device: " + user.controlScheme.Value.name);
-        //Do stuff when device changed
+       if(change == InputUserChange.ControlSchemeChanged) Debug.Log("New Device: " + user.controlScheme.Value.name);
+       //Do stuff when device changed
     }
     public static void CreateEvents(PlayerInput playerInput)
     {

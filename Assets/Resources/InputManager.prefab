@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: 5b86a24d9932eb04ca375d0ada013845, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 7168836649875204197}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -153,8 +153,12 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a7e76001-d679-4a4b-8bde-45d6e70b3bd4
     m_ActionName: Player/Fire[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 13e801f0-bb25-463f-969f-d7d60952dc8e
+    m_ActionName: Player/Jump[/Keyboard/space,/DualShock4GamepadHID/buttonSouth]
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
+  m_DefaultControlScheme: Keyboard
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
