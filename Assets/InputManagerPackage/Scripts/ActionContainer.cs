@@ -26,6 +26,11 @@ public class ActionContainer
         //Sets if this event is enabled or not
         _enabled = enable;
     }
+    public bool GetEnabled()
+    {
+        //Sets if this event is enabled or not
+        return _enabled;
+    }
     public void ClearListeners()
     {
         //Clears all listeners of this event and his specifics

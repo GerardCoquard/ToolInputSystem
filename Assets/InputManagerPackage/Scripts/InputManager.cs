@@ -9,6 +9,7 @@ public static class InputManager
 {
     static GameObject sceneInput;
     static List<ActionContainer> events = new List<ActionContainer>(); //List of all action events
+    static List<ActionContainer> temporaryDisabledEvents = new List<ActionContainer>();
     public static PlayerInput playerInput; //Current PlayerInput
     public static EventSystem eventSystem; //Current EventSystem
     static string path; //Path of the InputManager prefab
@@ -39,7 +40,7 @@ public static class InputManager
         foreach (ActionContainer _event in events)
         {
             _event.ClearListeners();
-        }     
+        }
     }
     public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
     {
@@ -69,6 +70,33 @@ public static class InputManager
     {
         //Subscribe to event of action named _actionName with _method
         return GetEvent(_actionName);
+    }
+    public static void DisableAllActions()
+    {
+        foreach (ActionContainer action in events)
+        {
+            if(action.GetEnabled())
+            {
+                temporaryDisabledEvents.Add(action);
+                action.SetEnabled(false);
+            }
+        }
+    }
+    public static void EnableAllActions()
+    {
+        foreach (ActionContainer action in temporaryDisabledEvents)
+        {
+            action.SetEnabled(true);
+        }
+        temporaryDisabledEvents = new List<ActionContainer>();
+    }
+    public static void EnableAllActionsIndependently()
+    {
+        foreach (ActionContainer action in events)
+        {
+            action.SetEnabled(true);
+        }
+        temporaryDisabledEvents = new List<ActionContainer>();
     }
     public static void ActionEnabled(string _actionName,bool _enabled)
     {
