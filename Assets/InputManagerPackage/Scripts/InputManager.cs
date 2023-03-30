@@ -1,17 +1,24 @@
 using System.Collections.Generic;
+using System;
+using UnityEngine.Events;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
-public static class InputManager
+
+
+
+static class InputManager
 {
     static GameObject sceneInput;
     static List<ActionContainer> events = new List<ActionContainer>(); //List of all action events
     static List<ActionContainer> temporaryDisabledEvents = new List<ActionContainer>();
-    public static PlayerInput playerInput; //Current PlayerInput
-    public static EventSystem eventSystem; //Current EventSystem
+    public delegate void DeviceChanged(Devices currentDevice);
+    public static event DeviceChanged OnDeviceChanged;
+    static PlayerInput playerInput; //Current PlayerInput
+    static EventSystem eventSystem; //Current EventSystem
+    public static Devices device { get; private set; }
     static string path; //Path of the InputManager prefab
     static InputManager()
     {
@@ -28,6 +35,8 @@ public static class InputManager
         sceneInput = CreateInputOnScene();
         MonoBehaviour.DontDestroyOnLoad(sceneInput);
         playerInput = sceneInput.GetComponent<PlayerInput>();
+        if(playerInput.currentControlScheme == "Gamepad") device = Devices.Gamepad;
+        else device = Devices.Keyboard;
         eventSystem = sceneInput.GetComponent<EventSystem>();
         CreateEvents(playerInput);
         //Subscribe to scene changes and device changes
@@ -41,10 +50,16 @@ public static class InputManager
         {
             _event.ClearListeners();
         }
+        OnDeviceChanged = null;
     }
-    public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice device)
+    public static void OnInputDeviceChange(InputUser user, InputUserChange change, InputDevice _device)
     {
-       if(change == InputUserChange.ControlSchemeChanged) Debug.Log("New Device: " + user.controlScheme.Value.name);
+       if(change == InputUserChange.ControlSchemeChanged)
+       {
+            if(user.controlScheme.Value.name == "Gamepad") device = Devices.Gamepad;
+            else device = Devices.Keyboard;
+            OnDeviceChanged?.Invoke(device);
+       }
        //Do stuff when device changed
     }
     public static void CreateEvents(PlayerInput playerInput)
@@ -129,4 +144,9 @@ public static class InputManager
         if(playerInput!=null) Debug.LogWarning("Action named " + _actionName + " doesn't exist");
         return null;
     }
+}
+public enum Devices
+{
+    Keyboard,
+    Gamepad
 }

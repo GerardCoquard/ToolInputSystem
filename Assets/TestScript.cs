@@ -10,13 +10,18 @@ public class TestScript : MonoBehaviour
     public int sceneNumber;
     private void OnEnable() {
         InputManager.GetAction("Fire").action += Shoot;
+        InputManager.OnDeviceChanged += TestDevices;
         InputManager.GetAction("Jump").action += ChangeScene;
     }
     private void OnDisable() {
         InputManager.GetAction("Fire").action -= Shoot;
+        InputManager.OnDeviceChanged -= TestDevices;
         InputManager.GetAction("Jump").action -= ChangeScene;
     }
-
+    public void TestDevices(Devices newDevice)
+    {
+        Debug.Log("New Device Detected: " + newDevice.ToString());
+    }
     public void Shoot(InputAction.CallbackContext context)
     {
         Debug.Log("Shoot! : " + context.phase);
